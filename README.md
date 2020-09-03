@@ -26,3 +26,7 @@ This is a QR Code based Blazor WebAssembly app.
   - Login and out may need the page to be refreshed.
   - Also; Once Admined in if go to non Admin page you are logged out.
 - Next add a database, probably SQLite.
+
+## Need
+- [Telerik UI for Blazor](https://www.telerik.com/blazor-ui)
+- [NodalTimePicket](https://www.nuget.org/packages/NodaTimePicker/) Will remove this.
