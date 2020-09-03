@@ -1,0 +1,149 @@
+﻿@page "/QRCode"
+@page "/QRCode/{CurrentCount:int}"
+@using QRCoder;
+@using System.Drawing;
+@using System.Drawing.Imaging;
+@using System.IO;
+@using System.Threading;
+@using System.Threading.Tasks;
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inject BlazorRestaurantQRCode.Data.HomeController  homeController
+@inject NavigationManager navigationManager
+
+<h1>&nbsp;Hungry Joes Restaurant</h1>
+<h2><font size="30">&nbsp;Table QRCodes.</font></h2>
+<h3>@tables</h3>
+<p></p>
+<table border="1">
+    @foreach (var qr in QRTables)
+                {
+    <tr>
+        <td>
+            <h5>&nbsp;</h5>
+            <h1>&nbsp;Hungry Joes Restaurant</h1>
+            <h2><font size="30">&nbsp;Please log your attendance here.</font></h2>
+            <p>&nbsp;Now a mandatory requirement due to COVID-19.</p>
+            <p>
+                &nbsp;Use the QR Code to access the site: Site it in your phone's camera. <br />
+                &nbsp;Or enter the following URL in your phone's browser.
+            </p>
+
+            <h2>&nbsp;@qr.InputText</h2>
+            <p>&nbsp;OR ...</p>
+            <h2>&nbsp;@qr.BitLy</h2>
+            <h1>&nbsp;Table: @qr.Table</h1>
+
+            &nbsp;<img src="@qr.QRCode" style="width:500px;height:500px;" />
+            <br />
+        </td>
+    </tr>
+}
+</table>
+
+@code{ [Parameter]
+    public int? CurrentCount { get; set; }
+
+    public string Tables { get; set; } = "1,3-5,7, 11-14";
+    private List<int> tables { get; set; } = null;
+
+    private List<QRTable> QRTables { get; set; }
+
+    List<string> InputTexts { get; set; }
+    //string QRCodeStr { get; set; } = "";
+    string bitly { get; set; } = "https://bit.ly/3fnzHij";
+
+
+    static int table = 0;
+    protected override void OnInitialized()
+    {
+        table++;
+        base.OnInitialized();
+        CurrentCount = CurrentCount ?? 1;
+        /*
+        if (CurrentCount != Data.Settings.QrcodePin)
+        {
+            navigationManager.NavigateTo("/");
+        }
+        if (!homeController.GetState())
+        {
+            navigationManager.NavigateTo("/");
+        }*/
+        //GenerateQRCode();
+        var tbl = Tables.Split(new char[] { ',' });
+        var tb = from t in tbl where t.Contains("-") select t;
+        var tb1 = from t in tbl where !t.Contains("-") select int.Parse(t);
+        tables = tb1.ToList<int>();
+
+        foreach (var tt in tb)
+        {
+            var ttt = tt.Split("-");
+            int start = int.Parse(ttt[0]);
+            int end = int.Parse(ttt[1]);
+            int start1 = Math.Min(start, end);
+            int end1 = Math.Max(start, end);
+            var  tttt  = Enumerable.Range(start1,end1 -start1 +1);
+            tables.AddRange(tttt);
+        }
+
+        var tbls = tables.Select(x => x).Distinct();
+        tables = tbls.ToList<int>();
+
+        QRTables = new List<QRTable>();
+        foreach (var table in tables)
+        {
+            QRTables.Add(GenerateQRCode(table));
+        }
+        StateHasChanged();
+    }
+
+
+    public QRTable GenerateQRCode(int table)
+    {
+        string bit = $"{bitly}/{table}";
+        QRTable qrTable = new QRTable { Table = table, BitLy = bit };
+        string QRCodeStr = "";
+        //var zz = httpContextAccessor.HttpContext.Request;
+        //string url = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host.Value;
+        //InputText = url + "";
+        qrTable.InputText = $"{BlazorRestaurantQRCode.Data.Settings.BaseURL}/{table}";
+        StateHasChanged();
+        //var z = HttpContext.Request.UrlReferrer;
+        //QRCodeStr = "";
+        //return;
+        if (!String.IsNullOrEmpty(qrTable.InputText))
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                /* var uri = new Uri(Request.Url.AbsoluteUri);
+                url = uri.Scheme + "://" + uri.Host + "/"; ente
+                                 var y = Url.Content(Request.Url.PathAndQuery);
+                var x = Request.Url.AbsoluteUri.ToString()
+
+                //Url generator = new Url("https://github.com/codebude/QRCoder/");
+                //string payload = generator.ToString();*/
+
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(qrTable.InputText, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+                using (Bitmap qrCodeImage = qrCode.GetGraphic(20))
+                {
+                    qrCodeImage.Save(ms, ImageFormat.Png);
+                    QRCodeStr = "data:image/png;base64," + Convert.ToBase64String(ms.ToArray());
+                }
+
+            }
+        }
+        qrTable.QRCode = QRCodeStr;
+        return qrTable;
+    }
+
+    public class QRTable
+    {
+        public int Table { get; set; }
+        public string InputText { get; set; }
+        public string QRCode { get; set; }
+        public string BitLy { get; set; }
+    } }
+

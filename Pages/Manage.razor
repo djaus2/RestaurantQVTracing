@@ -1,0 +1,157 @@
+﻿@page "/Manage"
+@page "/Manage/{CurrentCount:int}"
+@inject NavigationManager navigationManager
+@using System.ComponentModel.DataAnnotations;
+@using BlazorRestaurantQRCode.Data;
+@inject BlazorRestaurantQRCode.Data.HomeController  homeController
+@inject BlazorRestaurantQRCode.Data.MyService  myService
+
+@using AspNetMonsters.Blazor.Geolocation
+@inject LocationService  LocationService
+
+
+@using Newtonsoft.Json;
+@using System;
+@using System.Data;
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@using System.Text;
+
+@inject HttpClient client
+@inject IJSRuntime js
+
+<h2>Aths Essendon Track Log</h2>
+<h1>Management Login</h1>
+
+<br />
+
+<EditForm OnValidSubmit=@OnValidSubmit Model="@admin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <InputText @bind-Value=admin.Name class="form-control" id="Name" />
+        <ValidationMessage For="@(() => admin.Name)" />
+    </div>
+    <div class="form-group">
+        <label for="Password">Password</label><br />
+        <InputText type="Password" @bind-Value=admin.Pwd class="form-control" id="Password" />
+        <ValidationMessage For="@(() => admin.Pwd)" />
+    </div>
+    <div class="form-group">
+        <label for="Email">Email</label><br />
+        <InputText type="Email" @bind-Value=admin.Email class="form-control" id="Email" />
+        <ValidationMessage For="@(() => admin.Email)" />
+    </div>
+    <input type="submit" class="btn btn-primary" value="Manage" />
+</EditForm>
+<p><b>Note: After logging in please refresh the rendered page.</b></p>
+<h3>You are here</h3>
+<div>
+    Lat: @location?.Latitude <br />
+    Long: @location?.Longitude <br />
+    Accuracy: @location?.Accuracy <br />
+</div>
+@code {
+    [Parameter]
+    public int? CurrentCount { get; set; }
+
+    DAdmin admin = new DAdmin();
+    string PhoneText { get; set; } = "04";
+    string Club { get; set; } = "";
+    string Output { get; set; } = "";
+    string error { get; set; }
+
+    Location location=null;
+
+    protected async Task GetLocation()
+    {
+        location = await LocationService.GetLocationAsync();
+        this.StateHasChanged();
+    }
+
+    protected  override async Task  OnAfterRenderAsync(bool first)
+    {
+        if (first)
+        {
+            base.OnAfterRender(first);
+            await GetLocation();
+        }
+    }
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (homeController.GetState())
+        {
+            homeController.LogOut();
+        }
+        CurrentCount = CurrentCount ?? 1;
+        if (CurrentCount != Settings.ManagementPin)
+        {
+            navigationManager.NavigateTo("/");
+        }
+    }
+
+
+    async Task OnValidSubmit(EditContext editContext)
+    //async Task OnSubmit()
+    {
+        error = null;
+        try
+        {
+            string name = admin.Name;
+            string phone = admin.Pwd;
+            if (homeController.Authenticate(name, phone))
+            {
+                //Log admin access
+                D2Athlete athlete2 = new D2Athlete { Name = admin.Name, PhoneNumber = "44444444", Date = DateTime.Now, Email = admin.Name, Pin = 999 };
+                if (location != null)
+                {
+                    //MS SQL serer truncates decimal to 2 decimal digits
+                    //Ref: https://mattferderer.com/entity-framework-no-type-was-specified-for-the-decimal-column
+                    decimal? latitude = location?.Latitude * 1000000;
+                    decimal? longitute = location?.Longitude * 1000000;
+                    decimal? accuracy = location?.Accuracy * 1000000;
+                    athlete2.Latitude = latitude;
+                    athlete2.Longitude = longitute;
+                    athlete2.Accuracy = accuracy;
+                }
+                var content = new StringContent(
+                        JsonConvert.SerializeObject(athlete2),
+                        Encoding.UTF8,
+                        "application/json");
+
+                var response = await client.PostAsync($"{Settings.baseURL}", content);
+
+                var aths = await client.GetFromJsonAsync<D2Athlete[]>($"{Settings.baseURL}");
+
+                myService.CallRequestRefresh();
+                string target = $"/FetchData/{Settings.FetchDataPin}";
+                navigationManager.NavigateTo(target);
+            }
+            else
+                navigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    public class DAdmin
+    {
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string Pwd { get; set; }
+
+        [Required]
+        public string Email { get; set; }
+
+    }
+
+
+}

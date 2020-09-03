@@ -1,0 +1,52 @@
+﻿@page "/COVID-19"
+@inject BlazorRestaurantQRCode.Data.HomeController  homeController
+
+<h2>Aths Essendon Track Log</h2>
+<h1>COVID-19 Safe Practices</h1>
+
+<i><b>Please follow these guidelines whilst at the Moone Valley Athletics Centre:</b></i>
+<ul>
+    <li>
+        Keep 2 metres away from others wherever possible
+        <ul>
+            <li>Sprint training should be in lanes.</li>
+            <li>Do not do distance training in "packed" packs</li>
+        </ul>
+    </li>
+    <li>
+        Training groups in locations around the track must be limited to <font><b>10</b></font>.
+    </li>
+    <li>
+        Avoid physical greetings such as handshaking, high fives, hugs and kisses
+    </li>
+    <li>
+        Where possible bring your own equipment. For example:
+        <ul>
+            <li>Matts, towels etc.</li>
+            <li>Throwing equiment</li>
+        </ul>
+    </li>
+    <li>
+        Practise good hygiene in general.
+    </li>
+    <li>
+        Please purchase and bring a small pack of handwipes
+        <ul><li>.. And wipe down any shared items</li></ul>
+    </li>
+    <li>
+        Stay at home if you have any cold or flu symptoms. Seek medical advice and get tested for COVID-19
+    </li>
+</ul>
+
+@code{
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (homeController.GetState())
+        {
+            homeController.LogOut();
+        }
+        this.StateHasChanged();
+    }
+}
