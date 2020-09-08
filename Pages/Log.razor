@@ -28,7 +28,7 @@
 
 <br />
 
-<EditForm OnValidSubmit=@OnValidSubmit Model="@athlete">
+<EditForm OnValidSubmit=@OnValidSubmit Model="@tableTrace1">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="form-group">
@@ -36,13 +36,13 @@
     </div>
     <div class="form-group">
         <label for="Name">Name</label>
-        <InputText @bind-Value=athlete.Name class="form-control" id="Name" PlaceHolder="Please enter a first name at least." />
-        <ValidationMessage For="@(() => athlete.Name)" />
+        <InputText @bind-Value=tableTrace1.Name class="form-control" id="Name" PlaceHolder="Please enter a first name at least." />
+        <ValidationMessage For="@(() => tableTrace1.Name)" />
     </div>
     <div class="form-group">
         <label for="Age">Mobile Number with leading 0</label><br />
-        <InputText @bind-Value=athlete.PhoneNumber class="form-control" id="Mobile" PlaceHolder="Please enter a valid mobile number, eg 0456789123" />
-        <ValidationMessage For="@(() => athlete.PhoneNumber)" />
+        <InputText @bind-Value=tableTrace1.PhoneNumber class="form-control" id="Mobile" PlaceHolder="Please enter a valid mobile number, eg 0456789123" />
+        <ValidationMessage For="@(() => tableTrace1.PhoneNumber)" />
     </div>
     <input type="submit" class="btn btn-primary" value="Log Me" />
 </EditForm>
@@ -61,11 +61,12 @@
     [Parameter]
     public string Table { get; set; }
 
+    private const string ServiceEndpoint = "/api/TableTraces";
 
 
     public int mode { get; set; } = 1;
 
-    D2Athlete athlete = new D2Athlete();
+    TableTrace tableTrace1 = new TableTrace();
     string PhoneText { get; set; } = "04";
     string Club { get; set; } = "";
     string Output { get; set; } = "";
@@ -114,7 +115,7 @@
         {
             navigationManager.NavigateTo("/");
         }
-        athlete.Table = Table;
+        tableTrace1.Table = Table;
     }
 
 
@@ -128,8 +129,8 @@
             StateHasChanged();
 
             int pin = homeController.Pin;
-            string name = athlete.Name;
-            string phone = athlete.PhoneNumber;
+            string name = tableTrace1.Name;
+            string phone = tableTrace1.PhoneNumber;
             if (!CheckDetails(name, phone))
             {
                 showGif = false;
@@ -137,7 +138,8 @@
                 return;
             }
             homeController.Authenticate(name, phone);
-            D2Athlete athlete2 = new D2Athlete { Name = name, PhoneNumber = phone, Date = DateTime.Now, Email = "a@b.c.com", Mode = mode, Pin = Pin };
+            TableTrace tableTrace = new TableTrace { Name = name, PhoneNumber = phone, Date = DateTime.Now, Email = "a@b.c.com", Mode = mode, Pin = Pin };
+            tableTrace.Table = Table;
             if (location != null)
             {
                 //MS SQL serer truncates decimal to 2 decimal digits
@@ -145,19 +147,22 @@
                 decimal? latitude = location?.Latitude * 1000000;
                 decimal? longitute = location?.Longitude * 1000000;
                 decimal? accuracy = location?.Accuracy * 1000000;
-                athlete2.Latitude = latitude;
-                athlete2.Longitude = longitute;
-                athlete2.Accuracy = accuracy;
+                tableTrace.Latitude = latitude;
+                tableTrace.Longitude = longitute;
+                tableTrace.Accuracy = accuracy;
             }
 
-            var content = new StringContent(
-                JsonConvert.SerializeObject(athlete2),
-                Encoding.UTF8,
-                "application/json");
+            //One way of sending sending tableTrace
+            //var content = new StringContent(
+            //    JsonConvert.SerializeObject(tableTrace),
+            //    Encoding.UTF8,
+            //    "application/json");
+            //var response1 = await client.PostAsync($"{Settings.baseURL}", content);
+     
+            //Simpler coding. May need previous method for more complex serialisations.
+            var response2 = await client.PostAsJsonAsync<TableTrace>($"{Settings.baseURL}", tableTrace);
 
-            var response = await client.PostAsync($"{Settings.baseURL}", content);
-
-            var aths = await client.GetFromJsonAsync<D2Athlete[]>($"{Settings.baseURL}");
+            var traces= await client.GetFromJsonAsync<TableTrace[]>($"{Settings.baseURL}");
 
 
             showGif = false;

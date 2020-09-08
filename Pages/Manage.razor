@@ -106,7 +106,7 @@
             if (homeController.Authenticate(name, phone))
             {
                 //Log admin access
-                D2Athlete athlete2 = new D2Athlete { Name = admin.Name, PhoneNumber = "44444444", Date = DateTime.Now, Email = admin.Name, Pin = 999 };
+                TableTrace tableTrace = new TableTrace { Name = admin.Name, PhoneNumber = "44444444", Date = DateTime.Now, Email = admin.Name, Pin = 999 };
                 if (location != null)
                 {
                     //MS SQL serer truncates decimal to 2 decimal digits
@@ -114,18 +114,18 @@
                     decimal? latitude = location?.Latitude * 1000000;
                     decimal? longitute = location?.Longitude * 1000000;
                     decimal? accuracy = location?.Accuracy * 1000000;
-                    athlete2.Latitude = latitude;
-                    athlete2.Longitude = longitute;
-                    athlete2.Accuracy = accuracy;
+                    tableTrace.Latitude = latitude;
+                    tableTrace.Longitude = longitute;
+                    tableTrace.Accuracy = accuracy;
                 }
                 var content = new StringContent(
-                        JsonConvert.SerializeObject(athlete2),
+                        JsonConvert.SerializeObject(tableTrace),
                         Encoding.UTF8,
                         "application/json");
 
                 var response = await client.PostAsync($"{Settings.baseURL}", content);
 
-                var aths = await client.GetFromJsonAsync<D2Athlete[]>($"{Settings.baseURL}");
+                var aths = await client.GetFromJsonAsync<TableTrace[]>($"{Settings.baseURL}");
 
                 myService.CallRequestRefresh();
                 string target = $"/FetchData/{Settings.FetchDataPin}";

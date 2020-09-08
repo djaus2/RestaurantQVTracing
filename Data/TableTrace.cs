@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlazorRestaurantQRCode.Data
 {
-    public class D2Athlete
+    public class TableTrace
     {
         [Key]
         [Column("Id")]
@@ -65,9 +65,9 @@ namespace BlazorRestaurantQRCode.Data
         [JsonPropertyName("Pin")]
         public int Pin { get; set; }
 
-        public D2Athlete() {  }
+        public TableTrace() {  }
 
-        public D2Athlete(DateTime date ) { Date = date; }
+        public TableTrace(DateTime date ) { Date = date; }
 
         [NotMapped]
         [JsonIgnore]

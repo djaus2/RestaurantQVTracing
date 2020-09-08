@@ -11,6 +11,6 @@ namespace BlazorRestaurantQRCode.Data
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         {
         }
-        public DbSet<D2Athlete> D2Athletes { get; set; }
+        public DbSet<TableTrace> TableTraces { get; set; }
     }
 }
