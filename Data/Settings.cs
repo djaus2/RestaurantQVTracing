@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BlazorRestaurantQRCode.Data
+namespace TableTracewithQRCode.Data
 {
     public static class Settings
     {
         //public const string BaseURL = "https://athsessgate.azurewebsites.net";
-        public const string BaseURL = "https://localhost:5001";
-        public static string baseURL = $"{BaseURL}/api/TableTraces";
+        public const string BaseURL = "https://localhost:44362";
+        public static string TableTracesPath = $"{BaseURL}/api/TableTraces";
+        public static string RestaurantsPath = $"{BaseURL}/api/Restaurants";
         public const int ManagementPin = 137;
         public const int QrcodePin = 549;
         public const int FetchDataPin = 787;

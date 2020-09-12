@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 
-namespace BlazorRestaurantQRCode.Data
+namespace TableTracewithQRCode.Data
 {
     public class HomeController : Controller
     {

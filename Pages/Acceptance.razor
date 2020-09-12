@@ -1,17 +1,31 @@
 ﻿@page "/"
-@page "/{table}"
+@page "/{pTable}"
+@page "/{pRestaurantId}/{pTable}"
 @page "/Acceptance/"
-@page "/Acceptance/{table}"
+@page "/Acceptance/{pRestaurantId}"
+@page "/Acceptance/{pRestaurantId}/{pTable}"
 @inject NavigationManager navigationManager
-@inject BlazorRestaurantQRCode.Data.HomeController  homeController
+@inject TableTracewithQRCode.Data.HomeController  homeController
 
-<h2>Aths Essendon Track Log</h2>
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@inject HttpClient client
+
+<h2>Restaurant Contact Tracing</h2>
+<hr />
+@if (restaurant != null)
+{
+    <h2>Venue: @restaurant.Name </h2>
+}
+@if (table != null)
+{
+    <h2>Table: @table</h2>
+}
+<hr />
+<button class="btn btn-primary" @onclick="Continue">Log Me</button>&nbsp;&nbsp;
+<button class="btn btn-primary" @onclick="ContinueGroup">Log My Table</button>
+<br />
 <h1>Purpose of this Log</h1>
-<br />
-Table: @Table
-<br />
-<button class="btn btn-primary" @onclick="Continue">Continue</button>
-<br />
 <p><b>By continuing you understand and accept the terms and conditions.</b></p>
 <ul>
     <li>The purpose of this site is to log the MVAT usage</li>
@@ -43,28 +57,46 @@ Table: @Table
 
 
 
-@code{ [Parameter]
-    public string table { get; set; } = "0";
-    private int Table;
+@code{
+    [Parameter]
+    public string pRestaurantId { get; set; } = "1";
+    [Parameter]
+    public string pTable { get; set; } = "1";
 
-    protected override void OnInitialized()
+    public int restaurantId { get; set; }
+    public int table { get; set; }
+
+    public Restaurant restaurant { get; set; } = null;
+
+    protected override async Task OnInitializedAsync()
     {
         //table = table ?? "0";
         //if (table == "")
-            //table = "0";
+        //table = "0";
         //Table = int.Parse(table);
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         if (homeController.GetState())
         {
             homeController.LogOut();
         }
+        restaurantId = (pRestaurantId != null) ? int.Parse(pRestaurantId) : 1;
+        table = (pTable != null) ? int.Parse(pTable) : 1;
+        restaurant = await client.GetFromJsonAsync<Restaurant>($"{Settings.RestaurantsPath}/{restaurantId}");
+        //Settings.RestaurantsPath, restaurantId);
         this.StateHasChanged();
     }
 
     private void Continue()
     {
         int ticks = (int)(DateTime.Today.Ticks % 997);
-        string target = $"/Log/{ticks}/{table}";
+        string target = $"/Log/{homeController.Pin}/{restaurantId}/{table}";
         navigationManager.NavigateTo(target);
-    } }
+    }
+    private void ContinueGroup()
+    {
+        int ticks = (int)(DateTime.Today.Ticks % 997);
+        string target = $"/LogGroup/{homeController.Pin}/{restaurantId}/{table}";
+        navigationManager.NavigateTo(target);
+    }
+}
 

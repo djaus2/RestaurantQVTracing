@@ -2,9 +2,9 @@
 @page "/Manage/{CurrentCount:int}"
 @inject NavigationManager navigationManager
 @using System.ComponentModel.DataAnnotations;
-@using BlazorRestaurantQRCode.Data;
-@inject BlazorRestaurantQRCode.Data.HomeController  homeController
-@inject BlazorRestaurantQRCode.Data.MyService  myService
+@using TableTracewithQRCode.Data;
+@inject TableTracewithQRCode.Data.HomeController  homeController
+@inject TableTracewithQRCode.Data.MyService  myService
 
 @using AspNetMonsters.Blazor.Geolocation
 @inject LocationService  LocationService
@@ -20,7 +20,7 @@
 @inject HttpClient client
 @inject IJSRuntime js
 
-<h2>Aths Essendon Track Log</h2>
+<h2>Restaurant Contact Tracing</h2>
 <h1>Management Login</h1>
 
 <br />
@@ -123,9 +123,9 @@
                         Encoding.UTF8,
                         "application/json");
 
-                var response = await client.PostAsync($"{Settings.baseURL}", content);
+                var response = await client.PostAsync($"{Settings.TableTracesPath}", content);
 
-                var aths = await client.GetFromJsonAsync<TableTrace[]>($"{Settings.baseURL}");
+                var aths = await client.GetFromJsonAsync<TableTrace[]>($"{Settings.TableTracesPath}");
 
                 myService.CallRequestRefresh();
                 string target = $"/FetchData/{Settings.FetchDataPin}";

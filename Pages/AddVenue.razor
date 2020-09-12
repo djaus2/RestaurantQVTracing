@@ -1,0 +1,260 @@
+﻿@page "/addvenue"
+
+@using Newtonsoft.Json;
+@using System;
+@using System.Data;
+@using System.ComponentModel.DataAnnotations;
+@using TableTracewithQRCode.Data;
+
+@using System.Text;
+
+@inject NavigationManager navigationManager
+@inject TableTracewithQRCode.Data.HomeController  homeController
+
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@inject HttpClient client
+
+@inject IJSRuntime JsRuntime
+
+@using AspNetMonsters.Blazor.Geolocation
+@inject LocationService  LocationService
+
+
+
+
+<h2>Restaurant Contact Tracing</h2>
+<h1>Add A Venue</h1>
+<h1>@restName</h1>
+
+<br />
+
+<EditForm OnValidSubmit=@OnValidSubmit Model="@restaurant1">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label><b>Table: <i>@Table</i></b></label>
+    </div>
+    <div class="form-group">
+        <label for="Name">Venue Name</label>
+        <InputText @bind-Value=restaurant1.Name class="form-control" id="Name" PlaceHolder="Please enter a first name at least." />
+        <ValidationMessage For="@(() => restaurant1.Name)" />
+    </div>
+    <div class="form-group">
+        <label for="PhonrNumber">Mobile Number</label><br />
+        <InputText @bind-Value=restaurant1.PhoneNumber class="form-control" id="Mobile" PlaceHolder="Please enter a valid mobile number, eg 0456789123" />
+        <ValidationMessage For="@(() => restaurant1.PhoneNumber)" />
+    </div>
+    <div class="form-group">
+        <label for="Web">Web</label><br />
+        <InputText @bind-Value=restaurant1.Web class="form-control" id="Web" PlaceHolder="Please enter the Web URL" />
+        <ValidationMessage For="@(() => restaurant1.Web)" />
+    </div>
+    <div class="form-group">
+        <label for="ContactName">Contact Name</label><br />
+        <InputText @bind-Value=restaurant1.ContactName class="form-control" id="ContactName" PlaceHolder="Please enter a Contact Name" />
+        <ValidationMessage For="@(() => restaurant1.ContactName)" />
+    </div>
+    <div class="form-group">
+        <label for="Street">Street Address</label><br />
+        <InputText @bind-Value=restaurant1.Street class="form-control" id="Street" PlaceHolder="Please enter the Street Address" />
+        <ValidationMessage For="@(() => restaurant1.Street)" />
+    </div>
+    <div class="form-group">
+        <label for="Suburb">Suburb</label><br />
+        <InputText @bind-Value=restaurant1.Suburb class="form-control" id="Suburb" PlaceHolder="Please enter the Suburb" />
+        <ValidationMessage For="@(() => restaurant1.Suburb)" />
+    </div>
+    <div class="form-group">
+        <label for="State">State</label><br />
+        <InputText @bind-Value=restaurant1.State class="form-control" id="State" PlaceHolder="Please enter the State (3 letters)" />
+        <ValidationMessage For="@(() => restaurant1.State)" />
+    </div>
+    <div class="form-group">
+        <label for="PostCode">PostCode</label><br />
+        <InputText @bind-Value=restaurant1.PostCode class="form-control" id="PostCode" PlaceHolder="Please enter the Postcode (4 digits)" />
+        <ValidationMessage For="@(() => restaurant1.PostCode)" />
+    </div>
+    <div class="form-group">
+        <label for="Country">Country</label><br />
+        <InputText @bind-Value=restaurant1.Country class="form-control" id="Country" PlaceHolder="Please enter the Country" />
+        <ValidationMessage For="@(() => restaurant1.Country)" />
+    </div>
+    <input type="submit" class="btn btn-primary" value="Add Venue" />
+</EditForm>
+<h3>You are here</h3>
+<div>
+    Lat: @location?.Latitude <br />
+    Long: @location?.Longitude <br />
+    Accuracy: @location?.Accuracy <br />
+</div>
+@if (@showGif)
+{
+    <img src="./basicloader.gif" />
+}
+@code { [Parameter]
+    public int? CurrentCount { get; set; }
+    [Parameter]
+    public string restName { get; set; } = "HungrierJoes";
+    [Parameter]
+    public string Table { get; set; }
+
+    private const string ServiceEndpoint = "/api/Restaurants";
+
+
+    public int mode { get; set; } = 1;
+
+    Restaurant restaurant1 = new Restaurant();
+    string PhoneText { get; set; } = "04";
+    string Club { get; set; } = "";
+    string Output { get; set; } = "";
+    string error { get; set; }
+
+    bool showGif = false;
+
+    int Pin = 0;
+
+    HttpClient Http;
+
+    void LogOut()
+    {
+
+    }
+
+    Location location = null;
+
+    protected async Task GetLocation()
+    {
+        location = await LocationService.GetLocationAsync();
+        this.StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if (first)
+        {
+            base.OnAfterRender(first);
+            await GetLocation();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Http = new HttpClient();
+        await base.OnInitializedAsync();
+
+        try
+        {
+            var venues = await client.GetFromJsonAsync<Restaurant[]>(Settings.RestaurantsPath);
+        }
+        catch (Exception ex)
+        {
+        }
+        //if (homeController.GetState())
+        //{
+        //    homeController.LogOut();
+        //}
+        //CurrentCount = CurrentCount ?? 1;
+        //Table = Table ?? "0";
+        //Pin = homeController.Pin;
+        //if (CurrentCount != Pin)
+        //{
+        //    navigationManager.NavigateTo("/");
+        //}
+    }
+
+
+    //void OnValidSubmit(EditContext editContext)
+    async Task OnValidSubmit()
+    {
+        error = null;
+        try
+        {
+            showGif = true;
+            StateHasChanged();
+
+            //int pin = homeController.Pin;
+            //string name = restaurant1.Name;
+            //string phone = restaurant1.PhoneNumber;
+            //if (!CheckDetails(name, phone))
+            //{
+            //    showGif = false;
+            //    await JsRuntime.InvokeAsync<bool>("alert", "Invalid entry: Need Name and valid Mobile.");
+            //    return;
+            //}
+            //homeController.Authenticate(name, phone);
+            //TableTrace tableTrace = new TableTrace { Name = name, PhoneNumber = phone, Date = DateTime.Now, Email = "a@b.c.com", Mode = mode, Pin = Pin };
+            //tableTrace.Table = Table;
+            //if (location != null)
+            //{
+            //    //MS SQL serer truncates decimal to 2 decimal digits
+            //    //Ref: https://mattferderer.com/entity-framework-no-type-was-specified-for-the-decimal-column
+            //    decimal? latitude = location?.Latitude * 1000000;
+            //    decimal? longitute = location?.Longitude * 1000000;
+            //    decimal? accuracy = location?.Accuracy * 1000000;
+            //    tableTrace.Latitude = latitude;
+            //    tableTrace.Longitude = longitute;
+            //    tableTrace.Accuracy = accuracy;
+            //}
+
+
+            var response2 = await client.PostAsJsonAsync<Restaurant>(Settings.RestaurantsPath, restaurant1);
+
+            var venues = await client.GetFromJsonAsync<Restaurant[]>(Settings.RestaurantsPath);
+
+
+            showGif = false;
+            StateHasChanged();
+            //string target = $"/Thanks/{pin}";
+            //navigationManager.NavigateTo(target);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    /// <summary>
+    /// Check for a vali mobile number
+    /// Can enter a local landline
+    /// Can enter an email address
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="phone"></param>
+    /// <returns></returns>
+    bool CheckDetails(string name, string phone)
+    {
+        if (string.IsNullOrEmpty(name))
+            return false;
+        if (string.IsNullOrEmpty(phone))
+            return false;
+
+        //Validate Mobile
+        //0400000000 to 0499999999
+        long MobileNo;
+        if (long.TryParse(phone, out MobileNo))
+        {
+            if (MobileNo >= 0400000000)
+            {
+                if (MobileNo <= 0499999999)
+                {
+                    return true;
+                }
+            }
+            if (MobileNo >= 90000000)
+            {
+                if (MobileNo <= 99999999)
+                {
+                    return true;
+                }
+            }
+        }
+        var foo = new EmailAddressAttribute();
+        if (foo.IsValid("phone"))
+            return true;
+
+        return false;
+    }
+}
+
+

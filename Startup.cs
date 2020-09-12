@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using BlazorRestaurantQRCode.Data;
+using TableTracewithQRCode.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using AspNetMonsters.Blazor.Geolocation;
 
-namespace BlazorRestaurantQRCode
+namespace TableTracewithQRCode
 {
     public class Startup
     {

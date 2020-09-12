@@ -1,5 +1,5 @@
-﻿@page "/Log"
-@page "/Log/{pCurrentPin}/{pRestaurantId}/{pTable}"
+﻿@page "/LogGroup"
+@page "/LogGroup/{pCurrentPin}/{pRestaurantId}/{pTable}"
 
 @using Newtonsoft.Json;
 @using System;
@@ -23,7 +23,7 @@
 
 
 <h2>Restaurant Contact Tracing</h2>
-<h1>Log Me</h1>
+<h1>Log My Table</h1>
 
 @if (restaurant != null)
 {
@@ -38,26 +38,31 @@
             <label><b>Table: <i>@tableTrace.Table</i></b></label>
         </div>
         <div class="form-group" style="display: none">
-            <label for="NumInGroup">Number in Group</label>
-            <InputNumber @bind-Value=tableTrace.NumInGroup class="form-control" id="Restaurant" PlaceHolder="Please enter a first name at least." />
-            <ValidationMessage For="@(() => tableTrace.NumInGroup)" />
-        </div>
-        <div class="form-group" style="display: none">
             <label for="RestaurantId">RestaurantId</label>
             <InputNumber @bind-Value=tableTrace.RestaurantId class="form-control" id="Restaurant" PlaceHolder="Please enter a first name at least." />
             <ValidationMessage For="@(() => tableTrace.RestaurantId)" />
         </div>
         <div class="form-group">
-            <label for="Name">Name</label>
+            <label for="Name">Your Name</label>
             <InputText @bind-Value=tableTrace.Name class="form-control" id="Name" PlaceHolder="Please enter a first name at least." />
             <ValidationMessage For="@(() => tableTrace.Name)" />
         </div>
         <div class="form-group">
-            <label for="Age">Mobile Number with leading 0</label><br />
+            <label for="OtherNames">Other Names</label>
+            <InputText @bind-Value=tableTrace.OtherNames class="form-control" id="OtherNames" PlaceHolder="Please enter a first name at least." />
+            <ValidationMessage For="@(() => tableTrace.OtherNames)" />
+        </div>
+        <div class="form-group">
+            <label for="NumInGroup">Number in Group</label>
+            <InputNumber @bind-Value=tableTrace.NumInGroup class="form-control" id="Restaurant" PlaceHolder="Please enter a first name at least." />
+            <ValidationMessage For="@(() => tableTrace.NumInGroup)" />
+        </div>
+        <div class="form-group">
+            <label for="Age">Your Mobile Number</label><br />
             <InputText @bind-Value=tableTrace.PhoneNumber class="form-control" id="Mobile" PlaceHolder="Please enter a valid mobile number, eg 0456789123" />
             <ValidationMessage For="@(() => tableTrace.PhoneNumber)" />
         </div>
-        <input type="submit" class="btn btn-primary" value="Log Me" />
+        <input type="submit" class="btn btn-primary" value="Log Me" /> &nbsp; By submitting this you undertake to contaact others if required.
     </EditForm>
     <h3>You are here</h3>
     <div>
@@ -79,7 +84,7 @@ else
     public string pTable { get; set; } = "";
 
 
-
+    string OtherNames { get; set; }
     Restaurant restaurant { get; set; }
 
 
@@ -182,7 +187,7 @@ else
             if (!CheckDetails(tableTrace))
             {
                 showGif = false;
-                await JsRuntime.InvokeAsync<bool>("alert", "Invalid entry: Need Name and valid Mobile.");
+                await JsRuntime.InvokeAsync<bool>("alert", "Invalid entry: Need Correct Numbner of Names and valid Mobile.");
                 return;
             }
             homeController.Authenticate(name, phone);
@@ -234,6 +239,9 @@ else
     /// <returns></returns>
     bool CheckDetails(TableTrace tableTrace)
     {
+        var names = tableTrace.OtherNames.Split(new char[] { ',', ' ' });
+        if (names.Length < (tableTrace.NumInGroup-1))
+            return false;
         if (tableTrace == null)
             return false;
         if (string.IsNullOrEmpty(tableTrace.Name))

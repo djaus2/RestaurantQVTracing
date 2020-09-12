@@ -12,10 +12,10 @@ namespace TableTracewithQRCode.Data
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TableTracesController : ControllerBase
+    public class RestaurantsController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public TableTracesController(ApplicationDBContext context)
+        public RestaurantsController(ApplicationDBContext context)
         {
             this._context = context;
         }
@@ -23,24 +23,23 @@ namespace TableTracewithQRCode.Data
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var list = await _context.Restaurants.ToListAsync();
-            var athletes =  await _context.TableTraces.ToListAsync();
-            return Ok(athletes);
+            var list =  await _context.Restaurants.ToListAsync();
+            return Ok(list);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var dev = await _context.TableTraces.FirstOrDefaultAsync(a => a.Id == id);
+            var dev = await _context.Restaurants.FirstOrDefaultAsync(a => a.Id == id);
             return Ok(dev);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(TableTrace tableTrace)
+        public async Task<IActionResult> Post(Restaurant Restaurant)
         {
-            _context.Add(tableTrace);
+            _context.Add(Restaurant);
             await _context.SaveChangesAsync();
-            return Ok(tableTrace.Id);
+            return Ok(Restaurant.Id);
         }
 
 
@@ -48,15 +47,15 @@ namespace TableTracewithQRCode.Data
         //public async Task<IActionResult> Post(Object trace)
         //{
         //    var json = trace.ToString();
-        //    TableTrace tableTrace = JsonConvert.DeserializeObject<TableTrace>(json);
-        //    _context.Add(tableTrace);
+        //    Restaurant Restaurant = JsonConvert.DeserializeObject<Restaurant>(json);
+        //    _context.Add(Restaurant);
         //    await _context.SaveChangesAsync();
-        //    return Ok(tableTrace.Id);
+        //    return Ok(Restaurant.Id);
         //}
         [HttpPut]
-        public async Task<IActionResult> Put(TableTrace tableTrace)
+        public async Task<IActionResult> Put(Restaurant Restaurant)
         {
-            _context.Entry(tableTrace).State = EntityState.Modified;
+            _context.Entry(Restaurant).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -64,7 +63,7 @@ namespace TableTracewithQRCode.Data
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var dev = new TableTrace { Id = id };
+            var dev = new Restaurant { Id = id };
             _context.Remove(dev);
             await _context.SaveChangesAsync();
             return NoContent();

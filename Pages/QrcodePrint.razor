@@ -1,5 +1,6 @@
-﻿@page "/QRCode"
-@page "/QRCode/{CurrentCount:int}"
+﻿@layout AltLayout
+@page "/QRCodeprint"
+@page "/QRCodeprint/{int:restId}{tables}"
 @using QRCoder;
 @using System.Drawing;
 @using System.Drawing.Imaging;
@@ -35,12 +36,10 @@
                     }
             </InputSelect>
         </div>
-        @if (string.IsNullOrEmpty(restaurant.Image))
-        {
         <div class="form-group">
-            <label>Image: @restaurant.Image</label>
+            <label for="tablesRange">Image File Name</label>
+            <InputText @bind-Value=restaurant.Image class="form-control" id="Image" PlaceHolder="Please enter Image Filename, if one." />
         </div>
-        }
         <div class="form-group">
             <label for="tablesRange">Tables List</label>
             <InputText @bind-Value=restaurant.TablesCSV class="form-control" id="Tables" PlaceHolder="Please enter list of table numbers as CSV List." />

@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace BlazorRestaurantQRCode.Data
+namespace TableTracewithQRCode.Data
 {
     public class TableTrace
     {
+
         [Key]
         [Column("Id")]
         [JsonPropertyName("Id")]
@@ -21,15 +22,29 @@ namespace BlazorRestaurantQRCode.Data
         [JsonPropertyName("Name")]
         public string Name { get; set; }
 
-        [Column("Table")]
-        [Required]
-        [JsonPropertyName("Table")]
-        public string Table { get; set; }
+        [Column("OtherNames")]
+        [JsonPropertyName("OtherNames")]
+        public string OtherNames { get; set; }
 
         [Column("PhoneNumber")]
         [Required]
         [JsonPropertyName("PhoneNumber")]
         public string PhoneNumber { get; set; }
+
+        [Column("RestaurantId")]
+        [Required]
+        [JsonPropertyName("RestaurantId")]
+        public int RestaurantId { get; set; }
+
+        [Column("Table")]
+        [Required]
+        [JsonPropertyName("Table")]
+        public int Table { get; set; }
+        
+        [Column("NumInGroup")]
+        [Required]
+        [JsonPropertyName("NumInGroup")]
+        public int NumInGroup { get; set; }
 
         [Column("Email")]
         [JsonPropertyName("Email")]
